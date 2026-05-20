@@ -1,26 +1,32 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ['@imgly/background-removal'],
-  webpack: (config) => {
+  webpack: (config, { isServer }) => {
+    if (isServer) return config;
+
     config.experiments = {
       ...config.experiments,
       asyncWebAssembly: true,
       layers: true,
     };
+
     config.module.rules.push({
       test: /\.mjs$/,
       include: /node_modules/,
-      type: "javascript/auto",
+      type: 'javascript/auto',
       resolve: { fullySpecified: false },
     });
+
+    config.optimization.minimize = false;
+
     return config;
   },
   headers: async () => [
     {
-      source: "/(.*)",
+      source: '/(.*)',
       headers: [
-        { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
-        { key: "Cross-Origin-Embedder-Policy", value: "credentialless" },
+        { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
+        { key: 'Cross-Origin-Embedder-Policy', value: 'credentialless' },
       ],
     },
   ],
