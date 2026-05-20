@@ -1,26 +1,25 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ['@imgly/background-removal'],
+  // Use Terser (not SWC) for minification. Terser auto-detects .mjs files as
+  // ES modules (module: true) so it can parse import/export from onnxruntime-web.
+  swcMinify: false,
+
   webpack: (config, { isServer }) => {
     if (isServer) return config;
 
-    config.experiments = {
-      ...config.experiments,
-      asyncWebAssembly: true,
-      layers: true,
-    };
-
+    // type:auto + url:false → bundle .mjs as JS; suppress new URL() asset emission
+    // that would otherwise copy ort.node.min.mjs into static/media/ for the minifier.
     config.module.rules.push({
       test: /\.mjs$/,
       include: /node_modules/,
       type: 'javascript/auto',
       resolve: { fullySpecified: false },
+      parser: { url: false },
     });
-
-    config.optimization.minimize = false;
 
     return config;
   },
+
   headers: async () => [
     {
       source: '/(.*)',
