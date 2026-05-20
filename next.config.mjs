@@ -1,14 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   webpack: (config) => {
-    config.resolve.alias = {
-      ...config.resolve.alias,
-    };
     config.experiments = {
       ...config.experiments,
       asyncWebAssembly: true,
       layers: true,
     };
+    config.module.rules.push({
+      test: /\.mjs$/,
+      include: /node_modules/,
+      type: "javascript/auto",
+      resolve: { fullySpecified: false },
+    });
     return config;
   },
   headers: async () => [
